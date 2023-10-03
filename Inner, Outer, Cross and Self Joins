@@ -1,0 +1,120 @@
+-- INNER JOIN: Recall * selects all value from a table
+SELECT *
+FROM presidents; 
+
+SELECT prime_ministers.country, prime_ministers.contient, prime_minister, president 
+FROM prime_ministers 
+INNER JOIN presidents 
+ON prime_ministers.country = presidents,country; 
+
+--NOTE: table.column_name
+SELECT p1.country, p1.contient, prime_minister, president 
+FROM prime_ministers AS p1
+INNER JOIN presidents AS p2
+ON p1.country = p2.country; 
+
+SELECT p1.country, p1.contient, prime_minister, president 
+FROM prime_ministers AS p1
+INNER JOIN presidents AS p2
+USING(country);
+
+-- Select name fields (with alias) and region 
+SELECT cities.name AS city, countries.name AS country, region
+FROM cities
+INNER JOIN countries
+ON cities.country_code = countries.code;
+
+-- MUTLIPLE JOINS
+SELECT *
+FROM left_table
+INNER JOIN right_table 
+ON left_table.id = right_table.id
+INNER JOIN another_table
+ON left_table.id = another_table.id 
+
+SELECT p1.country, p1.contient, president, prime_minister 
+FROM prime_minister AS p1
+INNER JOIN president AS p2
+USING(country);
+
+--CHAINING JOINS
+SELECT p1.country, p1.contient, president, prime_minister, pm_start
+FROM prime_minister AS p1
+INNER JOIN president AS p2
+USING(country) 
+INNER JOIN prime_minister_terms AS p3
+USING(prime minister); 
+
+SELECT *
+FROM left_table 
+INNER JOIN right_table 
+ON left_table.id = right_table.id;
+
+SELECT *
+FROM left_table 
+INNER JOIN right_table 
+ON left_table.id = right_table.id
+	AND left_table.date = right_table.date;
+
+-- Chapter 2: Outer Joins, Cross Joins, and Self Joins
+-- LEFT and RIGHT JOINs
+
+SELECT p1.country, prime_minister, president 
+FROM prime_minister AS p1
+LEFT JOIN presidents AS p2
+USING(country);
+
+SELECT *
+FROM left_table
+RIGHT JOIN right_table
+ON left_table.id = right_table.id; 
+
+SELECT p1.country, prime_minister, president 
+FROM prime_minister AS p1
+RIGHT JOIN presidents AS p2
+USING(country);
+
+-- FULL JOINs
+SELECT left_table.id AS L_id,
+		right_tbale.id AS R_id,
+		left_table.val AS L_val,
+		right_table.val AS R_val
+FROM left_table
+FULL JOIN right_table
+USING (id); 
+
+SELECT p1.countru AS country, prime_minister, president 
+FROM prime_minister AS p1
+FULL JOIN presidents AS p2
+ON p1.country = p2.country
+LIMIT 10; 
+
+-- Crossing into CROSS JOIN
+SELECT id1, id2 
+FROM table1
+CROSS JOIN table2; 
+
+SELECT prime_minister, president 
+FROM prime_ministers as p1
+CROSS JOIN presidents AS p2
+WHERE p1.continent IN ('Asia')
+	AND p2.continent IN ('South America'); 
+	
+-- Self Joins
+SELECT 
+	p1.country AS country1,
+	p2.country AS country2, 
+	p1.continent
+FROM prime_ministers AS p1
+INNER JOIN prime_ministers AS p2 
+ON p1.contient = p2.contient 
+LIMIT 10;
+
+SELECT 
+	p1.country AS country1,
+	p2.country AS country2, 
+	p1.continent
+FROM prime_ministers AS p1
+INNER JOIN prime_ministers AS p2 
+ON p1.contient = p2.contient 
+	AND p1.country <> p2.country;

@@ -1,0 +1,205 @@
+-- Chapter 3: Set Theory for SQL Joins
+-- UNION syntax
+SELECT * 
+FROM left_table
+UNION 
+SELECT *
+FROM right_table;  
+
+--UNION ALL syntax
+SELECT * 
+FROM left_table
+UNION ALL
+SELECT *
+FROM right_table; 
+
+SELECT * 
+FROM monarchs; 
+
+SELECT monarch AS leader, country 
+FROM monarchs 
+UNION 
+SELECT prime_minister, country 
+FROM prime_ministers 
+ORDER BY country, leader
+LIMIT 10; 
+
+--INTERSECT 
+SELECT id, val 
+FROM left_table 
+INTERSECT 
+SELECT id,val 
+FROM right_table; 
+
+-- INTERSECT syntax
+SELECT *
+FROM left_table 
+INTERSECT 
+SELECT *
+FROM right_table; 
+
+--Comapred to INNER JOIN syntax
+SELECT *
+FROM left_table 
+INNER JOIN right_table 
+ON left.id = right.id
+	AND left.val = right.val; 
+	
+SELECT country AS intersect_country
+FROM prime_ministers 
+INTERSECT 
+SELECT country 
+FROM presidents; 
+
+SELECT country, prime_minister AS leader
+FROM prime_ministers 
+INTERSECT 
+SELECT country, monarch 
+FROM monarchs; 
+
+--EXCEPT 
+SELECT monarch, soccer.country
+FROM monarchs 
+EXCEPT 
+SELECT prime_minister, country 
+FROM prime_minsiters; 
+
+-- Chapter 4: Subqueries 
+--Subquerying with semi joins and anti joins 
+
+SELECT *
+FROM left_table 
+INNER JOIN right_table 
+ON left_table.id = right_table.id;  
+
+SELECT country, contient, president 
+FROM presidents; 
+
+SELECT country 
+FROM states 
+WHERE indep_year < 1800; 
+
+SELECT president, country, contient 
+FROM presidents
+WHERE country IN 
+	(SELECT country 
+	FROM states 
+	WHERE indep_year < 1800);
+
+SELECT country, presidents
+FROM presidents
+WHERE continent LIKE '%America'
+	AND country NOT IN 
+	(SELECT country 
+	 FROM states 
+	 WHERE undep_year < 1800); 
+	 
+-- subqueties inside WHERE and SELECT 
+SELECT *
+FROM some_table 
+WHERE some_numeric_field IN (4, 8, 12); 
+
+SELECT *
+FROM some_table 
+WHERE some_field IN
+	(include subquery here); 
+	
+SELECT *
+FROM some_table 
+WHERE some_field IN
+	(SELECT some_numeric_field
+	 FROM another_table
+	 WHERE field2 = some_condition); 
+	 
+SELECT DISTINCT contient 
+FROM states; 
+
+SELECT DISTINCT contient, 
+	(SELECT COUNT(*)
+	 from ONARCHS
+	 where states.contient = monarch.continent) AS monarch_count
+FROM states; 
+
+-- Find top nine countries with the most cities
+SELECT countries.name AS country, COUNT(*) AS cities_num
+FROM countries
+LEFT JOIN cities
+ON countries.code = cities.country_code
+GROUP BY country
+-- Order by count of cities as cities_num
+ORDER BY cities_num DESC, country
+LIMIT 9;
+	 
+SELECT countries.name AS country,
+-- Subquery that provides the count of cities   
+  (SELECT COUNT(*)
+   FROM cities
+   WHERE cities.country_code = countries.code) AS cities_num
+FROM countries
+ORDER BY cities_num DESC, country
+LIMIT 9;
+
+-- Subqueries inside FROM 
+SLECT continent, MAX(indep_year) AS most_recent 
+FROM states 
+GROUP BY continent; 
+
+SELECT left_table.id, left_val
+FROM left_table, right_table 
+WHERE left_table.id = right_table.id 
+
+SELECT DISTINCT left_table.id, left_val
+FROM left_table, right_table 
+WHERE left_table.id = right_table.id 
+
+-- Query to retuen conteitns with monarchs and the year most recent country gained independence
+SELECT DISTINCT monarchs.continent, sub.most_recent 
+FROM monarchs, 
+	(SELECT 
+	 contient, 
+	 MAX(indep_year) AS most_recent
+	 FROM world.states
+	 GROUP BY contient) AS sub 
+WHERE monarchs.contient = sub.contient 
+ORDER BY contient; 
+
+-- Select local_name and lang_num from appropriate tables
+SELECT local_name, sub.lang_num
+FROM countries,
+    (SELECT code, COUNT(*) AS lang_num
+     FROM languages
+     GROUP BY code) AS sub
+-- Where codes match    
+WHERE countries.code = sub.code
+ORDER BY lang_num DESC;
+
+-- Select relevant fields
+SELECT code, inflation_rate, unemployment_rate
+FROM economies
+WHERE year = 2015 
+  AND code NOT IN
+-- Subquery returning country codes filtered on gov_form
+    (SELECT code
+     FROM countries
+     WHERE (gov_form LIKE '%Monarchy%' OR gov_form LIKE '%Republic%'))
+ORDER BY inflation_rate;
+
+-- Select fields from cities
+SELECT 
+	name, 
+    country_code, 
+    city_proper_pop, 
+    metroarea_pop,
+    city_proper_pop / metroarea_pop * 100 AS city_perc
+FROM cities
+-- Use subquery to filter city name
+WHERE name IN
+  (SELECT capital
+   FROM countries
+   WHERE (continent = 'Europe'
+   OR continent LIKE '%America'))
+-- Add filter condition such that metroarea_pop does not have null values
+	  AND metroarea_pop IS NOT NULL
+-- Sort and limit the result
+ORDER BY city_perc DESC
+LIMIT 10;
